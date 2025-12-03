@@ -5,19 +5,24 @@
 
 #include <SPI.h>
 #include <WiFiNINA.h>
+#include <ArduinoHttpClient.h>
 
-char networkName[] = ""; // name of the network
-char password[] = ""; // password into the network - we may need username too later
+#define LIDAR_RECIEVE A1
+#define LIDAR_TRANSMIT A2
+#define LIGHT_VAL A0
+
+char networkName[] = "AndroidAP1AF7"; // name of the network
+char password[] = "oelk5711"; // password into the network - we may need username too later
 char server[] = ""; // the server address
 int port = 80; // the port to the server
 
 WiFiClient client; // the wifi client object
 
-unsigned long lastConnectionTime = 0;
-const unsigned long postInterval = 10000;
-
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LIGHT_VAL, INPUT);
+  pinMode(LIDAR_RECIEVE, INPUT);
+  pinMode(LIDAR_TRANSMIT, INPUT);
 
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -25,21 +30,19 @@ void setup() {
 
   // now for wifi shenanigans
   if (WiFi.status() == WL_NO_MODULE) {
-    Serial.println("Can't connect to the WiFi Module (something has gone HORRIBLY WRONG)");
     while (true) {
       digitalWrite(LED_BUILTIN, HIGH);
       delay(1);
       digitalWrite(LED_BUILTIN, LOW);
+      Serial.println("Can't connect to the WiFi Module (something has gone HORRIBLY WRONG)");
       delay(1);
     }
   }
 
   // connecting time
-  while (status != WL_CONNECTED) {
+  while (WiFi.begin(networkName, password) != WL_CONNECTED) {
     Serial.print("Connecting to: ");
     Serial.println(networkName);
-    // this will be interesting to try and connect to eduroam
-    status = WiFi.begin(networkName, password);
     delay(10000);
   }
 
@@ -49,7 +52,14 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  // todo: sensor data
 
+  int read1 = analogRead(LIDAR_TRANSMIT);
+  int read = analogRead(LIDAR_RECIEVE);
+  Serial.print("LIDAR: ");
+  Serial.print(read);
+  Serial.print(" ");
+  Serial.println(read1);
 }
 
 // print the status of the wifi connection
@@ -66,27 +76,26 @@ void printWifiStatus() {
 }
 
 // Make a server request
-void httpRequest() {
-  client.stop();
+void httpRequest(String lightVal, String lidarVal) {
+  HttpClient httpClient = HttpClient(client, server, port);
+  String postData = "param1=" + lightVal + "&param2=" + lidarVal;
 
-  if (client.connect(server, port)) {
-    Serial.println("Sending request...");
-    client.println("POST / HTTP/1.1");
-    client.println("User-Agent: ArduinoWiFi/1.1");
-    client.println("Access-Allow-Cross-Origin: allow");
-    client.println("Connection: close");
-    // TODO: add the body of the post request
-    client.println();
-    lastConnectionTime = millis();
-  }
-  else {
-    // blink the LED a bit to let us know something is wrong
-    Serial.println("Connection to server failed!");
-    for (int i = 0; i < 10; i++) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(1);
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(1);
-    }
-  }
+  String path = "/databasepath/";
+
+  httpClient.beginRequest();
+  httpClient.post(path);
+  httpClient.sendHeader("Content-Type", "application/x-www-form-urlencoded"); // application/json
+  httpClient.sendHeader("Content-Length", postData.length());
+  httpClient.endRequest();
+  httpClient.write((byte*) postData.c_str(), postData.length());
+
+  int statusCode = httpClient.responseStatusCode();
+  String response = httpClient.responseBody();
+
+  Serial.print("Status: ");
+  Serial.println(statusCode);
+  Serial.print("Response: ");
+  Serial.println(response);
+
+  httpClient.stop();
 }
