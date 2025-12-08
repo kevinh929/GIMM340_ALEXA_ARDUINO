@@ -8,7 +8,7 @@ async function  query(sql, params) {
             connection = await mysql.createConnection({
                 host: "",
                 user: "kevinhoagland929",
-                password: "",
+                password: "PUsAFL43yNffxmSRIdSzOMhTT7GO8ayAQ8l",
                 database: "kevinhoagland929"
             });
             console.log("Connection established");
