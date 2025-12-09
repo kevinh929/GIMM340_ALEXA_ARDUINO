@@ -61,11 +61,6 @@ app.get('/events/', async (req, res) => {
     }
 });
 
-app.post('/postData/', (req, res) => {
-    // todo!!!!
-    
-})
-
 
 
 // ************************************** ALEXA Defaults ***************************************
@@ -296,4 +291,4 @@ const skill = Alexa.SkillBuilders.custom()
 const adapter = new ExpressAdapter(skill, false, false);
 
 app.post('/', adapter.getRequestHandlers());
-app.listen(3000);
+app.listen(80);
