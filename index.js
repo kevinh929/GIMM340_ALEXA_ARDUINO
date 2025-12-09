@@ -276,8 +276,6 @@ const ErrorHandler = {
 //Entry Point
 const skill = Alexa.SkillBuilders.custom()
     .addErrorHandlers(ErrorHandler)
-    .addRequestInterceptors(LogRequestInterceptor)
-    .addResponseInterceptors(LogResponseInterceptor)
     .addRequestHandlers(
         LaunchRequestHandler,
         HelpIntentHandler,
