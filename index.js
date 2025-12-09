@@ -11,6 +11,8 @@ const kids = new kid();
 
 const app = express();
 
+console.log("Starting Parent Alarm Alexa Skill Server...");
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/kid/', async (req, res) => {
@@ -140,6 +142,21 @@ const SessionEndedRequestHandler = {
     }
 };
 
+const ErrorHandler = {
+    canHandle() {
+        return true;
+    },
+    handle(handlerInput, error) {
+        const speakOutput = 'Sorry, I had trouble doing what you asked. Please try again.';
+        console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
 // ************************************** CUSTOM INTENT HANDLERS ***************************************
 
 //AlertParentIntentHandler
@@ -253,21 +270,6 @@ const GetBedtimeReportIntentHandler = {
     }
 };
 
-const ErrorHandler = {
-    canHandle() {
-        return true;
-    },
-    handle(handlerInput, error) {
-        const speakOutput = 'Sorry, I had trouble doing what you asked. Please try again.';
-        console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt(speakOutput)
-            .getResponse();
-    }
-};
-
 //Entry Point
 const skill = Alexa.SkillBuilders.custom()
     .addErrorHandlers(ErrorHandler)
@@ -292,3 +294,6 @@ const adapter = new ExpressAdapter(skill, false, false);
 
 app.post('/', adapter.getRequestHandlers());
 app.listen(8080);
+
+
+console.log("Parent Alarm Alexa Skill Server started on port 8080");
