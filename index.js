@@ -198,6 +198,80 @@ const EndBedtimeIntentHandler = {
     }
 };
 
+const AddKidIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AddKidIntent';
+    },
+    handle(handlerInput) {
+        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
+        const speakOutput = `You activated the AddKidIntent ${(child) ? " with name: " + child : ""}`;
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt('anything else?')
+            .getResponse();
+    }
+};
+
+const RemoveKidIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'RemoveKidIntent';
+    },
+    handle(handlerInput) {
+        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
+        const speakOutput = `You activated the RemoveKidIntent ${(child) ? " with name: " + child : ""}`;
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt('anything else?')
+            .getResponse();
+    }
+};
+
+const ChangeKidNameIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ChangeKidNameIntent';
+    },
+    handle(handlerInput) {
+        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
+        const speakOutput = `You activated the ChangeKidNameIntent ${(child) ? " with name: " + child : ""}`;
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt('anything else?')
+            .getResponse();
+    }
+};
+
+const GetBedtimeReportIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetBedtimeReportIntent';
+    },
+    handle(handlerInput) {
+        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
+        const speakOutput = `You activated the GetBedtimeReportIntent ${(child) ? " with name: " + child : ""}`;
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt('anything else?')
+            .getResponse();
+    }
+};
+
+const ErrorHandler = {
+    canHandle() {
+        return true;
+    },
+    handle(handlerInput, error) {
+        const speakOutput = 'Sorry, I had trouble doing what you asked. Please try again.';
+        console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
 
 //Entry Point
 const skill = Alexa.SkillBuilders.custom()
@@ -212,11 +286,15 @@ const skill = Alexa.SkillBuilders.custom()
         SessionEndedRequestHandler,
         AlertParentIntentHandler,
         StartBedtimeIntentHandler,
-        EndBedtimeIntentHandler
+        EndBedtimeIntentHandler,
+        AddKidIntentHandler,
+        RemoveKidIntentHandler,
+        ChangeKidNameIntentHandler,
+        GetBedtimeReportIntentHandler
     )
     .withCustomUserAgent('reference-skills/intro-to-alexa-conversations/v7')
     .create(); 
-     
+
 const adapter = new ExpressAdapter(skill, false, false);
 
 app.post('/', adapter.getRequestHandlers());
