@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     next();
 });
 
-
+/*
 app.get('/kid/', async (req, res) => {
     let result = {};
     
@@ -290,10 +290,10 @@ const skill = Alexa.SkillBuilders.custom()
     )
     .withCustomUserAgent('reference-skills/intro-to-alexa-conversations/v7')
     .create(); 
-
+*/
 const adapter = new ExpressAdapter(skill, false, false);
 
-app.post('/alexa', adapter.getRequestHandlers());
+//app.post('/alexa', adapter.getRequestHandlers());
 app.listen(8080);
 
 
