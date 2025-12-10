@@ -15,6 +15,12 @@ console.log("Starting Parent Alarm Alexa Skill Server...");
 
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+    console.log("Incoming request:", req.method, req.url);
+    next();
+});
+
+
 app.get('/kid/', async (req, res) => {
     let result = {};
     
