@@ -360,7 +360,7 @@ const skill = Alexa.SkillBuilders.custom()
 
 const adapter = new ExpressAdapter(skill, false, false);
 
-app.get('/alexa', (req, res) => {
+app.post('/', (req, res) => {
     console.log("request!!!!!!!!!!!!!!!", req);
     console.log("response!!!!!!!!!!!!!!!", res);
     try {
