@@ -18,10 +18,12 @@ WiFiClient client; // the wifi client object
 
 int lightTimer = 0;
 int lastDist = 0;
+int distDiff = 0;
+int lowDist = 1000, highDist = 0;
 
 const int arduinoID = 0;
 const int lidarID = 0;
-const int lightID = 0; 
+const int lightID = 1; 
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -57,8 +59,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  // todo: sensor data
-
   // LIDAR
   if (Serial1.available() % 9 == 0) {
     if (Serial1.read() == 0x59 && Serial1.read() == 0x59) {
@@ -79,13 +79,22 @@ void loop() {
         Serial.println(" cm");
         lastDist = dist;
 
+        if (dist < lowDist) {
+          lowDist = dist;
+        }
+        if (dist > highDist) {
+          highDist = dist;
+        }
+
         if (lightTimer > 10) {
           int lightVal = digitalRead(LIGHT_VAL);
           Serial.print("Light: ");
           Serial.println(lightVal);
           lightTimer = 0;
-
-          httpRequest(lightVal, dist);
+          distDiff = highDist - lowDist;
+          httpRequest(lightVal, distDiff);
+          highDist = 0;
+          lowDist = 0;
         }
       }
       
@@ -117,10 +126,16 @@ void httpRequest(int lightVal, int lidarVal) {
   HttpClient httpClient = HttpClient(client, server, port);
   String postData = "light=";
   postData += lightVal;
+  postData += "&light_id=";
+  postData += lightID;
   postData += "&lidar=";
   postData += lidarVal;
+  postData += "&lidar_id=";
+  postData += lidarID;
+  postData += "&arduino_id=";
+  postData += arduinoID;
 
-  String path = "/";
+  String path = "/arduino/";
 
   httpClient.beginRequest();
   httpClient.post(path);
