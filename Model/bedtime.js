@@ -24,6 +24,33 @@ class Bedtimes {
             throw error;
         }
     }
+    async innerJoinAll(parameters = {}) {
+        try {
+            let selectSql = `SELECT bedtime.id, bedtime.bedtime_start, bedtime.bedtime_end, kid_names.name, kid_names.arduino_id FROM bedtime INNER JOIN kid_names ON bedtime.kid_id = kid_names.id WHERE 1=1`,
+                queryParams = [];
+            if (parameters.bedtime_start) {
+                selectSql += ` AND bedtime.bedtime_start LIKE ?`;
+                queryParams.push(`%${parameters.bedtime_start}%`);
+            }
+            if (parameters.bedtime_end) {
+                selectSql += ` AND bedtime.bedtime_end LIKE ?`;
+                queryParams.push(`%${parameters.bedtime_end}%`);
+            }
+            if (parameters.name) {
+                selectSql += ` AND kid_names.name LIKE ?`;
+                queryParams.push(`%${parameters.name}%`);
+            }
+            if (parameters.arduino_id) {
+                selectSql += ` AND kid_names.arduino_id LIKE ?`;
+                queryParams.push(`%${parameters.arduino_id}%`);
+            }
+            return await connection.query(selectSql, queryParams);
+        }
+        catch (error) {
+            console.error("Error fetching all data: ", error);
+            throw error;
+        }
+    }
     async create(parameters) {
         try{
             const insertSql = `

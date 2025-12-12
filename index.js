@@ -21,6 +21,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// Get kids table
 app.get('/kid/', async (req, res) => {
     let result = {};
     
@@ -36,6 +37,7 @@ app.get('/kid/', async (req, res) => {
     res.json({'data': result });
 });
 
+// Get bedtimes table
 app.get('/bedtime/', async (req, res) => {
     let result = {};
     try {
@@ -50,6 +52,7 @@ app.get('/bedtime/', async (req, res) => {
     res.json({'data': result });
 });
 
+// Get events table
 app.get('/events/', async (req, res) => {
     let result = {};
     try {
@@ -64,6 +67,40 @@ app.get('/events/', async (req, res) => {
     res.json({'data': result });
 });
 
+app.post('/arduino/', async (req, res) => {
+    let result = {};
+    try {
+        console.log("Query Parameters: ", req.query);
+        let bedtime = await bedtimes.innerJoinAll(req.query);
+        console.log("Data fetched: ", bedtime);
+
+        if (bedtime.length == 0) {
+            res.status(299).send("Bedtime not active");
+        }
+        // now we interpret data
+        else if (req.query.lidar > 35) {
+            console.log("Something moved!");
+            result = await event.create({
+                arduino_id: req.query.arduino_id,
+                sensor_id: req.query.lidar_id,
+                event_time: Date.now()
+            });
+        }
+        else if (req.query.light) {
+            console.log("Lights are on during bedtime!");
+            result = await event.create({
+                arduino_id: req.query.arduino_id,
+                sensor_id: req.query.lidar_id,
+                event_time: Date.now()
+            });
+        }
+    }
+    catch (error) {
+        console.error("Error submitting sensor data: ", error);
+        res.status(500).send("Error submitting sensor data");
+    }
+    res.json({ 'data': result });
+});
 
 
 // ************************************** ALEXA Defaults ***************************************
