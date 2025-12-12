@@ -233,11 +233,11 @@ const StartBedtimeIntentHandler = {
         activeBedtime = { kid: child, startTime: Date.now() };
         endBedtime = { kid: child, endTime: Date.now() + 8*60*60*1000 };
 
-        // await bedtimes.create({
-        //     kid_id: child,
-        //     bedtime_start: activeBedtime.startTime,
-        //     bedtime_end: endBedtime.endTime
-        // });
+        await bedtimes.create({
+            kid_id: child,
+            bedtime_start: activeBedtime.startTime,
+            bedtime_end: endBedtime.endTime
+        });
 
 
         return handlerInput.responseBuilder
