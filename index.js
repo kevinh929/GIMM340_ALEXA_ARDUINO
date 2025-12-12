@@ -253,6 +253,9 @@ const EndBedtimeIntentHandler = {
     handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the EndBedtimeIntent ${(child) ? " with name: " + child : ""}`;
+        isbedtimeActive = false;
+        activeBedtime = {};
+        endBedtime = {};
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -287,9 +290,13 @@ const RemoveKidIntentHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'RemoveKidIntent';
     },
-    handle(handlerInput) {
+    async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the RemoveKidIntent ${(child) ? " with name: " + child : ""}`;
+        await kids.delete({
+            name: child,
+            arduino_id: 0
+        });
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
@@ -302,9 +309,13 @@ const ChangeKidNameIntentHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ChangeKidNameIntent';
     },
-    handle(handlerInput) {
+    async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the ChangeKidNameIntent ${(child) ? " with name: " + child : ""}`;
+        await kids.update({
+            name: child,
+            arduino_id: 0
+        });
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
@@ -349,7 +360,7 @@ const skill = Alexa.SkillBuilders.custom()
 
 const adapter = new ExpressAdapter(skill, false, false);
 
-app.post('/alexa', adapter.getRequestHandlers());
+app.get('/alexa', adapter.getRequestHandlers());
 app.listen(8080);
 
 
