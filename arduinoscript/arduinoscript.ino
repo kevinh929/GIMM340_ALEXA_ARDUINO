@@ -2,31 +2,36 @@
  Cool arduino script
  Not sure what to really say right now I'll figure out what to say here later
 */
-
+#include <Arduino.h>
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <ArduinoHttpClient.h>
 
-#define LIDAR_RECIEVE A1
-#define LIDAR_TRANSMIT A2
 #define LIGHT_VAL A0
 
 char networkName[] = "AndroidAP1AF7"; // name of the network
 char password[] = "oelk5711"; // password into the network - we may need username too later
-char server[] = ""; // the server address
-int port = 80; // the port to the server
+char server[] = "34.219.183.65"; // the server address
+int port = 8080; // the port to the server
 
 WiFiClient client; // the wifi client object
+
+int lightTimer = 0;
+int lastDist = 0;
+
+const int arduinoID = 0;
+const int lidarID = 0;
+const int lightID = 0; 
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LIGHT_VAL, INPUT);
-  pinMode(LIDAR_RECIEVE, INPUT);
-  pinMode(LIDAR_TRANSMIT, INPUT);
 
   // put your setup code here, to run once:
   Serial.begin(9600);
+  Serial1.begin(115200);
   while (!Serial); // wait for serial connection
+  while (!Serial1);
 
   // now for wifi shenanigans
   if (WiFi.status() == WL_NO_MODULE) {
@@ -54,12 +59,44 @@ void loop() {
   // put your main code here, to run repeatedly:
   // todo: sensor data
 
-  int read1 = analogRead(LIDAR_TRANSMIT);
-  int read = analogRead(LIDAR_RECIEVE);
-  Serial.print("LIDAR: ");
-  Serial.print(read);
-  Serial.print(" ");
-  Serial.println(read1);
+  // LIDAR
+  if (Serial1.available() % 9 == 0) {
+    if (Serial1.read() == 0x59 && Serial1.read() == 0x59) {
+      int distLow = Serial1.read();
+      int distHigh = Serial1.read();
+      int strengthLow = Serial1.read();
+      int strengthHigh = Serial1.read();
+      int tempLow = Serial1.read();
+      int tempHight = Serial1.read();
+      int checksum = Serial1.read();
+
+      int dist = distLow + (distHigh * 256);
+      // for some reason, LiDAR sensor we're using spits out junk data occassionally
+      // the abs call is meant to filter out sudden jumps of possibly meters
+      if (dist < 1000 && dist > 3 && abs(lastDist - dist) < 80) {
+        Serial.print("Distance: ");
+        Serial.print(dist);
+        Serial.println(" cm");
+        lastDist = dist;
+
+        if (lightTimer > 10) {
+          int lightVal = digitalRead(LIGHT_VAL);
+          Serial.print("Light: ");
+          Serial.println(lightVal);
+          lightTimer = 0;
+
+          httpRequest(lightVal, dist);
+        }
+      }
+      
+    }
+    // else {
+    //   Serial.println("LiDAR bugging out!");
+    // }
+    lightTimer++;
+    
+    delay(10);
+  }
 }
 
 // print the status of the wifi connection
@@ -76,11 +113,14 @@ void printWifiStatus() {
 }
 
 // Make a server request
-void httpRequest(String lightVal, String lidarVal) {
+void httpRequest(int lightVal, int lidarVal) {
   HttpClient httpClient = HttpClient(client, server, port);
-  String postData = "param1=" + lightVal + "&param2=" + lidarVal;
+  String postData = "light=";
+  postData += lightVal;
+  postData += "&lidar=";
+  postData += lidarVal;
 
-  String path = "/databasepath/";
+  String path = "/";
 
   httpClient.beginRequest();
   httpClient.post(path);
