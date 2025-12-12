@@ -360,7 +360,17 @@ const skill = Alexa.SkillBuilders.custom()
 
 const adapter = new ExpressAdapter(skill, false, false);
 
-app.get('/alexa', adapter.getRequestHandlers());
+app.get('/alexa', (req, res) => {
+    console.log(req);
+    console.log(res);
+    try {
+        return adapter.getRequestHandlers();
+    }
+    catch (error) {
+        console.error("Alexa error: ", error);
+        res.status(500).send("Alexa error check the logs");
+    }
+});
 app.listen(8080);
 
 
