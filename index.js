@@ -16,6 +16,8 @@ const app = express();
 
 console.log("Starting Parent Alarm Alexa Skill Server...");
 
+app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 
 
