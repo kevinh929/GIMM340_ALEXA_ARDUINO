@@ -99,7 +99,7 @@ app.post('/arduino/', async (req, res) => {
         console.error("Error submitting sensor data: ", error);
         res.status(500).send("Error submitting sensor data");
     }
-    res.json({ 'data': result });
+    //res.json({ 'data': result });
 });
 
 
