@@ -8,6 +8,9 @@ const events = require("./Model/events");
 const event = new events();
 const kid = require("./Model/kid");
 const kids = new kid();
+let isbedtimeActive = false;
+let activeBedtime = {};
+let endBedtime = {};
 
 const app = express();
 
@@ -203,10 +206,11 @@ const AlertParentIntentHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AlertParentIntent';
     },
-    handle(handlerInput) {
+    async handle(handlerInput) {
         let data = [Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid'), Alexa.getSlotValue(handlerInput.requestEnvelope, 'sensor'), Alexa.getSlotValue(handlerInput.requestEnvelope, 'time')];
-        const speakOutput = `Alert from parent alarm: ${data[1]} triggered from ${data[0]} at ${data[2]}`;
-
+        const bedtimeReport = await bedtimes.innerJoinAll();
+        const speakOutput = `Alert from parent alarm: ${JSON.stringify(bedtimeReport)}`;
+        
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
@@ -220,9 +224,18 @@ const StartBedtimeIntentHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'StartBedtimeIntent';
     },
-    handle(handlerInput) {
+    async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the StartBedtimeIntent ${(child) ? " with name: " + child : ""}`;
+        isbedtimeActive = true;
+        activeBedtime = { kid: child, startTime: Date.now() };
+        endBedtime = { kid: child, endTime: Date.now() + 8*60*60*1000 };
+
+        await bedtimes.create({
+            kid_id: child,
+            bedtime_start: activeBedtime.startTime,
+            bedtime_end: endBedtime.endTime
+        });
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -253,9 +266,15 @@ const AddKidIntentHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AddKidIntent';
     },
-    handle(handlerInput) {
+    async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the AddKidIntent ${(child) ? " with name: " + child : ""}`;
+
+        await kids.create({
+            name: child,
+            arduino_id: 0
+        });
+
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
