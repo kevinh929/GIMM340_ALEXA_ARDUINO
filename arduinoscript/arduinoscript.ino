@@ -11,7 +11,7 @@
 
 char networkName[] = "AndroidAP1AF7"; // name of the network
 char password[] = "oelk5711"; // password into the network - we may need username too later
-char server[] = "34.219.183.65"; // the server address
+char server[] = "34.212.146.11"; // the server address
 int port = 8080; // the port to the server
 
 WiFiClient client; // the wifi client object
