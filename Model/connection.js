@@ -6,7 +6,7 @@ async function  query(sql, params) {
     try {
         if (connection === null) {
             connection = await mysql.createConnection({
-                host: "",
+                host: "student-databases.cvode4s4cwrc.us-west-2.rds.amazonaws.com",
                 user: "kevinhoagland929",
                 password: "PUsAFL43yNffxmSRIdSzOMhTT7GO8ayAQ8l",
                 database: "kevinhoagland929"
