@@ -91,7 +91,7 @@ app.post('/arduino/', async (req, res) => {
                 event_time: Date.now()
             });
         }
-        else if (req.query.light) {
+        else if (!req.query.light) {
             console.log("Lights are on during bedtime!");
             result = await event.create({
                 arduino_id: req.query.arduino_id,

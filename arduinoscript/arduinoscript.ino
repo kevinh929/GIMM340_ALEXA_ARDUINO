@@ -3,16 +3,18 @@
  Not sure what to really say right now I'll figure out what to say here later
 */
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <SPI.h>
 #include <WiFiNINA.h>
-#include <ArduinoHttpClient.h>
+//#include <ArduinoHttpClient.h>
+#include <HttpClient.h>
 
 #define LIGHT_VAL A0
 
 char networkName[] = "AndroidAP1AF7"; // name of the network
 char password[] = "oelk5711"; // password into the network - we may need username too later
-char server[] = "34.212.146.11"; // the server address
-int port = 8080; // the port to the server
+char server[] = "aws-testing-1.onrender.com"; // the server address
+int port = 10000; // the port to the server
 
 WiFiClient client; // the wifi client object
 
@@ -123,34 +125,39 @@ void printWifiStatus() {
 
 // Make a server request
 void httpRequest(int lightVal, int lidarVal) {
-  HttpClient httpClient = HttpClient(client, server, port);
-  String postData = "light=";
-  postData += lightVal;
-  postData += "&light_id=";
-  postData += lightID;
-  postData += "&lidar=";
-  postData += lidarVal;
-  postData += "&lidar_id=";
-  postData += lidarID;
-  postData += "&arduino_id=";
-  postData += arduinoID;
+  // HttpClient httpClient = HttpClient(client, server, port);
 
-  String path = "/arduino/";
+  // JsonDocument doc;
+  // doc["light"] = lightVal;
+  // doc["light_id"] = lightID;
+  // doc["lidar"] = lidarVal;
+  // doc["lidar_id"] = lidarID;
+  // doc["arduino_id"] = arduinoID;
 
-  httpClient.beginRequest();
-  httpClient.post(path);
-  httpClient.sendHeader("Content-Type", "application/x-www-form-urlencoded"); // application/json
-  httpClient.sendHeader("Content-Length", postData.length());
-  httpClient.endRequest();
-  httpClient.write((byte*) postData.c_str(), postData.length());
+  // String requestBody;
+  // serializeJson(doc, requestBody);
 
-  int statusCode = httpClient.responseStatusCode();
-  String response = httpClient.responseBody();
+  // httpClient.beginRequest();
+  // httpClient.post("/arduino/");
+  // httpClient.sendHeader("Content-Type", "application/json"); // application/json
+  // httpClient.sendHeader("Content-Length", String(requestBody.length()));
+  // httpClient.endRequest();
+  // httpClient.write((byte*) requestBody.c_str(), requestBody.length());
 
-  Serial.print("Status: ");
-  Serial.println(statusCode);
-  Serial.print("Response: ");
-  Serial.println(response);
+  // int statusCode = httpClient.responseStatusCode();
+  // String response = httpClient.responseBody();
 
-  httpClient.stop();
+  // Serial.print("Status: ");
+  // Serial.println(statusCode);
+  // Serial.print("Response: ");
+  // Serial.println(response);
+
+  // httpClient.stop();
+  WiFiClientSecure client;
+  HTTPClient http;
+
+  
+
+  http.begin(client, server);
+  http.POST();
 }
