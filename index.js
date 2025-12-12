@@ -361,8 +361,8 @@ const skill = Alexa.SkillBuilders.custom()
 const adapter = new ExpressAdapter(skill, false, false);
 
 app.get('/alexa', (req, res) => {
-    console.log(req);
-    console.log(res);
+    console.log("request!!!!!!!!!!!!!!!", req);
+    console.log("response!!!!!!!!!!!!!!!", res);
     try {
         return adapter.getRequestHandlers();
     }
