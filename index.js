@@ -16,9 +16,9 @@ const app = express();
 
 console.log("Starting Parent Alarm Alexa Skill Server...");
 
-app.use(express.json());
+//app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 
 
 app.use((req, res, next) => {
@@ -233,11 +233,12 @@ const StartBedtimeIntentHandler = {
         activeBedtime = { kid: child, startTime: Date.now() };
         endBedtime = { kid: child, endTime: Date.now() + 8*60*60*1000 };
 
-        await bedtimes.create({
-            kid_id: child,
-            bedtime_start: activeBedtime.startTime,
-            bedtime_end: endBedtime.endTime
-        });
+        // await bedtimes.create({
+        //     kid_id: child,
+        //     bedtime_start: activeBedtime.startTime,
+        //     bedtime_end: endBedtime.endTime
+        // });
+
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
