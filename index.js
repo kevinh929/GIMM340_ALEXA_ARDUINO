@@ -238,7 +238,7 @@ const EndBedtimeIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'EndBedtimeIntent';
     },
     handle(handlerInput) {
-        let child = Alexa.getSlotType(handlerInput.requestEnvelope, 'kid');
+        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the EndBedtimeIntent ${(child) ? " with name: " + child : ""}`;
 
         return handlerInput.responseBuilder
