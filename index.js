@@ -371,7 +371,7 @@ app.get('/alexa', (req, res) => {
         res.status(500).send("Alexa error check the logs");
     }
 });
-app.listen(8080);
+app.listen(10000);
 
 
-console.log("Parent Alarm Alexa Skill Server started on port 8080");
+console.log("Parent Alarm Alexa Skill Server started on port 10000");
