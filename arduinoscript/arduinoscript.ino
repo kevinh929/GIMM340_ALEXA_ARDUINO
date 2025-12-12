@@ -14,9 +14,9 @@
 char networkName[] = "AndroidAP1AF7"; // name of the network
 char password[] = "oelk5711"; // password into the network - we may need username too later
 char server[] = "aws-testing-1.onrender.com"; // the server address
-int port = 10000; // the port to the server
+int port = 443; // the port to the server
 
-WiFiClient client; // the wifi client object
+WiFiSSLClient client; // the wifi client object
 
 int lightTimer = 0;
 int lastDist = 0;
@@ -153,11 +153,39 @@ void httpRequest(int lightVal, int lidarVal) {
   // Serial.println(response);
 
   // httpClient.stop();
-  WiFiClientSecure client;
-  HTTPClient http;
 
-  
+  // 1. Stop any previous connection
+  client.stop();
 
-  http.begin(client, server);
-  http.POST();
+  Serial.println("Starting HTTPS connection...");
+
+  // 2. Connect to the server on port 443 (HTTPS)
+  if (client.connect(server, port)) {
+    Serial.println("Connected to server!");
+
+    // 3. Build the URL path with Query Parameters
+    // Matches req.query.lidar, req.query.light, etc. in index.js
+    String url = "/arduino/";
+    url += "?lidar=" + String(lidarVal);
+    url += "&light=" + String(lightVal);
+    url += "&arduino_id=" + String(arduinoID);
+    url += "&lidar_id=" + String(lidarID); 
+
+    Serial.print("Requesting URL: ");
+    Serial.println(url);
+
+    // 4. Send the HTTP POST headers
+    client.print("POST " + url + " HTTP/1.1\r\n");
+    client.print("Host: " + String(server) + "\r\n");
+    client.print("Connection: close\r\n");
+    // We are sending data in the URL (Query Params), so content-length is 0
+    client.print("Content-Length: 0\r\n"); 
+    client.print("\r\n"); // End of headers
+
+  } else {
+    Serial.println("Connection failed!");
+    // Common SSL Issue: If this fails, you may need to add the 
+    // "aws-testing-1.onrender.com" SSL certificate to your 
+    // Arduino board using the 'Firmware Updater' tool in the IDE.
+  }
 }
