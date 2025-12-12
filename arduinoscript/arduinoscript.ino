@@ -3,11 +3,11 @@
  Not sure what to really say right now I'll figure out what to say here later
 */
 #include <Arduino.h>
-#include <ArduinoJson.h>
-#include <SPI.h>
+//#include <ArduinoJson.h>
+//#include <SPI.h>
 #include <WiFiNINA.h>
 //#include <ArduinoHttpClient.h>
-#include <HttpClient.h>
+//#include <HttpClient.h>
 
 #define LIGHT_VAL A0
 
@@ -124,7 +124,80 @@ void printWifiStatus() {
 }
 
 // Make a server request
+// huge thanks to jojo i guess
 void httpRequest(int lightVal, int lidarVal) {
+   if (client.connect(server, port)) {
+    Serial.println(F("Connected!"));
+
+    // Create JSON
+    String json = "{\"light\":";
+    json += lightVal;
+    json += ",\"lidar\":";
+    json += lidarVal;
+    json += "}";
+
+    // Send POST request
+    client.println(F("POST /arduino/ HTTP/1.1"));
+    client.print(F("Host: "));
+    client.println(server);
+    client.println(F("Content-Type: application/json"));
+    client.print(F("Content-Length: "));
+    client.println(json.length());
+    client.println(F("Connection: close"));
+    client.println();
+    client.println(json);
+
+    Serial.println(F("Request sent"));
+
+    // Wait for response
+    unsigned long start = millis();
+    while (client.connected() && millis() - start < 5000) {
+      if (client.available()) {
+        char c = client.read();
+        Serial.write(c);
+      }
+    }
+
+    Serial.println(F("\nResponse received"));
+    client.stop();
+
+  } else {
+    Serial.println(F("Connection failed!"));
+
+    // Try regular HTTP as fallback (port 80)
+    Serial.println(F("Trying HTTP (port 80)..."));
+    WiFiClient httpClient;
+
+    if (httpClient.connect(server, 443)) {
+      Serial.println(F("HTTP connected!"));
+
+      String json = "{\"light\":";
+      json += lightVal;
+      json += ",\"lidar\":";
+      json += lidarVal;
+      json += "}";
+
+      httpClient.println(F("POST /arduino/ HTTP/1.1"));
+      httpClient.print(F("Host: "));
+      httpClient.println(server);
+      httpClient.println(F("Content-Type: application/json"));
+      httpClient.print(F("Content-Length: "));
+      httpClient.println(json.length());
+      httpClient.println(F("Connection: close"));
+      httpClient.println();
+      httpClient.println(json);
+      delay(1000);
+
+      while (httpClient.available()) {
+        Serial.write(httpClient.read());
+      }
+
+      httpClient.stop();
+      Serial.println(F("\nHTTP request completed"));
+    } else {
+      Serial.println(F("HTTP also failed"));
+    }
+  }
   // HttpClient httpClient = HttpClient(client, server, port);
 
   // JsonDocument doc;
@@ -155,37 +228,37 @@ void httpRequest(int lightVal, int lidarVal) {
   // httpClient.stop();
 
   // 1. Stop any previous connection
-  client.stop();
+  // client.stop();
 
-  Serial.println("Starting HTTPS connection...");
+  // Serial.println("Starting HTTPS connection...");
 
-  // 2. Connect to the server on port 443 (HTTPS)
-  if (client.connect(server, port)) {
-    Serial.println("Connected to server!");
+  // // 2. Connect to the server on port 443 (HTTPS)
+  // if (client.connect(server, port)) {
+  //   Serial.println("Connected to server!");
 
-    // 3. Build the URL path with Query Parameters
-    // Matches req.query.lidar, req.query.light, etc. in index.js
-    String url = "/arduino/";
-    url += "?lidar=" + String(lidarVal);
-    url += "&light=" + String(lightVal);
-    url += "&arduino_id=" + String(arduinoID);
-    url += "&lidar_id=" + String(lidarID); 
+  //   // 3. Build the URL path with Query Parameters
+  //   // Matches req.query.lidar, req.query.light, etc. in index.js
+  //   String url = "/arduino/";
+  //   url += "?lidar=" + String(lidarVal);
+  //   url += "&light=" + String(lightVal);
+  //   url += "&arduino_id=" + String(arduinoID);
+  //   url += "&lidar_id=" + String(lidarID); 
 
-    Serial.print("Requesting URL: ");
-    Serial.println(url);
+  //   Serial.print("Requesting URL: ");
+  //   Serial.println(url);
 
-    // 4. Send the HTTP POST headers
-    client.print("POST " + url + " HTTP/1.1\r\n");
-    client.print("Host: " + String(server) + "\r\n");
-    client.print("Connection: close\r\n");
-    // We are sending data in the URL (Query Params), so content-length is 0
-    client.print("Content-Length: 0\r\n"); 
-    client.print("\r\n"); // End of headers
+  //   // 4. Send the HTTP POST headers
+  //   client.print("POST " + url + " HTTP/1.1\r\n");
+  //   client.print("Host: " + String(server) + "\r\n");
+  //   client.print("Connection: close\r\n");
+  //   // We are sending data in the URL (Query Params), so content-length is 0
+  //   client.print("Content-Length: 0\r\n"); 
+  //   client.print("\r\n"); // End of headers
 
-  } else {
-    Serial.println("Connection failed!");
-    // Common SSL Issue: If this fails, you may need to add the 
-    // "aws-testing-1.onrender.com" SSL certificate to your 
-    // Arduino board using the 'Firmware Updater' tool in the IDE.
-  }
+  // } else {
+  //   Serial.println("Connection failed!");
+  //   // Common SSL Issue: If this fails, you may need to add the 
+  //   // "aws-testing-1.onrender.com" SSL certificate to your 
+  //   // Arduino board using the 'Firmware Updater' tool in the IDE.
+  // }
 }
