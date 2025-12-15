@@ -56,12 +56,12 @@ class Kid {
             throw error;
         }    
     }
-    async remove(id) {
+    async remove(name) {
         try {
-            const deleteSql = `DELETE FROM kid_names WHERE id = ?`;
-            const deleteParams = [id];
+            const deleteSql = `DELETE FROM kid_names WHERE name = ?`;
+            const deleteParams = [name];
             await connection.query(deleteSql, deleteParams);
-            return { id };
+            return { name };
         }
         catch (error) {
             console.error("Error deleting kid: ", error);

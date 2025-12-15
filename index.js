@@ -296,10 +296,7 @@ const RemoveKidIntentHandler = {
     async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the RemoveKidIntent ${(child) ? " with name: " + child : ""}`;
-        await kids.delete({
-            name: child,
-            arduino_id: 0
-        });
+        await kids.remove(child);
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
