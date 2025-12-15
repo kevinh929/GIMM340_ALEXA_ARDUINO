@@ -88,7 +88,7 @@ void loop() {
           highDist = dist;
         }
 
-        if (lightTimer > 10) {
+        if (lightTimer > 100) {
           int lightVal = digitalRead(LIGHT_VAL);
           Serial.print("Light: ");
           Serial.println(lightVal);
@@ -96,7 +96,7 @@ void loop() {
           distDiff = highDist - lowDist;
           httpRequest(lightVal, distDiff);
           highDist = 0;
-          lowDist = 0;
+          lowDist = 1000;
         }
       }
       
@@ -126,78 +126,126 @@ void printWifiStatus() {
 // Make a server request
 // huge thanks to jojo i guess
 void httpRequest(int lightVal, int lidarVal) {
-   if (client.connect(server, port)) {
-    Serial.println(F("Connected!"));
+  // 1. Clean up any old connection
+  client.stop();
 
-    // Create JSON
-    String json = "{\"light\":";
-    json += lightVal;
-    json += ",\"lidar\":";
-    json += lidarVal;
-    json += "}";
+  Serial.println("\n--- Starting Request ---");
 
-    // Send POST request
-    client.println(F("POST /arduino/ HTTP/1.1"));
-    client.print(F("Host: "));
-    client.println(server);
-    client.println(F("Content-Type: application/json"));
-    client.print(F("Content-Length: "));
-    client.println(json.length());
-    client.println(F("Connection: close"));
-    client.println();
-    client.println(json);
+  // 2. Connect to the Render Server (Port 443 requires SSL)
+  // We use 'client' which is defined as WiFiSSLClient at the top of your script
+  if (client.connect(server, 443)) {
+    Serial.println("Connected to server!");
 
-    Serial.println(F("Request sent"));
+    // 3. Put data in the URL (Query Parameters)
+    // This allows the server to read it via req.query WITHOUT express.urlencoded
+    String url = "/arduino/";
+    url += "?lidar=" + String(lidarVal);
+    url += "&light=" + String(lightVal);
+    url += "&arduino_id=" + String(arduinoID);
+    url += "&lidar_id=" + String(lidarID); 
+    url += "&light_id=" + String(lightID);
 
-    // Wait for response
-    unsigned long start = millis();
-    while (client.connected() && millis() - start < 5000) {
+    Serial.print("Sending URL: ");
+    Serial.println(url);
+
+    // 4. Send the POST Request
+    client.print("POST " + url + " HTTP/1.1\r\n");
+    client.print("Host: " + String(server) + "\r\n");
+    client.print("Connection: close\r\n");
+
+    // IMPORTANT: Tell server the body is empty so it doesn't wait for data
+    client.print("Content-Length: 0\r\n"); 
+    client.print("\r\n"); 
+    // 5. Read the response (for debugging)
+    unsigned long timeout = millis();
+    while (client.connected() && millis() - timeout < 5000) {
       if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
+        String line = client.readStringUntil('\n');
+        Serial.println("Server: " + line);
+        timeout = millis();
       }
     }
-
-    Serial.println(F("\nResponse received"));
-    client.stop();
-
   } else {
-    Serial.println(F("Connection failed!"));
-
-    // Try regular HTTP as fallback (port 80)
-    Serial.println(F("Trying HTTP (port 80)..."));
-    WiFiClient httpClient;
-
-    if (httpClient.connect(server, 443)) {
-      Serial.println(F("HTTP connected!"));
-
-      String json = "{\"light\":";
-      json += lightVal;
-      json += ",\"lidar\":";
-      json += lidarVal;
-      json += "}";
-
-      httpClient.println(F("POST /arduino/ HTTP/1.1"));
-      httpClient.print(F("Host: "));
-      httpClient.println(server);
-      httpClient.println(F("Content-Type: application/json"));
-      httpClient.print(F("Content-Length: "));
-      httpClient.println(json.length());
-      httpClient.println(F("Connection: close"));
-      httpClient.println();
-      httpClient.println(json);
-      delay(1000);
-
-      while (httpClient.available()) {
-        Serial.write(httpClient.read());
-      }
-
-      httpClient.stop();
-      Serial.println(F("\nHTTP request completed"));
-    } else {
-      Serial.println(F("HTTP also failed"));
-    }
+    // If we get here, the SSL Certificate is likely missing or WiFi is unstable
+    Serial.println("Connection failed! (Did you upload the SSL cert for onrender.com?)");
   }
+
+  Serial.println("Delaying 10 seconds");
+  delay(10000);
+  //  if (client.connect(server, port)) {
+  //   // Serial.println(F("Connected!"));
+
+  //   // // Create JSON
+  //   // String json = "{\"light\":";
+  //   // json += lightVal;
+  //   // json += ",\"lidar\":";
+  //   // json += lidarVal;
+  //   // json += "}";
+
+  //   // // Send POST request
+  //   // client.println(F("POST /arduino/ HTTP/1.1"));
+  //   // client.print(F("Host: "));
+  //   // client.println(server);
+  //   // client.println(F("Content-Type: application/json"));
+  //   // client.print(F("Content-Length: "));
+  //   // client.println(json.length());
+  //   // client.println(F("Connection: close"));
+  //   // client.println();
+  //   // client.println();
+
+  //   // Serial.println(F("Request sent"));
+
+    
+
+  //   // Wait for response
+  //   unsigned long start = millis();
+  //   while (client.connected() && millis() - start < 5000) {
+  //     if (client.available()) {
+  //       char c = client.read();
+  //       Serial.write(c);
+  //     }
+  //   }
+
+  //   Serial.println(F("\nResponse received"));
+  //   client.stop();
+
+  // } else {
+  //   Serial.println(F("Connection failed!"));
+
+  //   // Try regular HTTP as fallback (port 80)
+  //   Serial.println(F("Trying HTTP (port 80)..."));
+  //   WiFiClient httpClient;
+
+  //   if (httpClient.connect(server, 80)) {
+  //     Serial.println(F("HTTP connected!"));
+
+  //     String json = "{\"light\":";
+  //     json += lightVal;
+  //     json += ",\"lidar\":";
+  //     json += lidarVal;
+  //     json += "}";
+
+  //     httpClient.println(F("POST /arduino/ HTTP/1.1"));
+  //     httpClient.print(F("Host: "));
+  //     httpClient.println(server);
+  //     httpClient.println(F("Content-Type: application/json"));
+  //     httpClient.print(F("Content-Length: "));
+  //     httpClient.println(json.length());
+  //     httpClient.println(F("Connection: close"));
+  //     httpClient.println();
+  //     httpClient.println(json);
+  //     delay(1000);
+
+  //     while (httpClient.available()) {
+  //       Serial.write(httpClient.read());
+  //     }
+
+  //     httpClient.stop();
+  //     Serial.println(F("\nHTTP request completed"));
+  //   } else {
+  //     Serial.println(F("HTTP also failed"));
+  //   }
+  // }
   // HttpClient httpClient = HttpClient(client, server, port);
 
   // JsonDocument doc;
