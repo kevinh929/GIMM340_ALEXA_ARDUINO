@@ -81,7 +81,6 @@ app.post('/arduino/', async (req, res) => {
 
         if (bedtime.length == 0) {
             res.status(299).send("Bedtime not active");
-            return;
         }
         // now we interpret data
         if (req.query.lidar > 35) {
@@ -93,7 +92,7 @@ app.post('/arduino/', async (req, res) => {
             });
         }
         
-        if (req.query.light == "1") {
+        if (!req.query.light) {
             console.log("Lights are on during bedtime!");
             result = await event.create({
                 arduino_id: req.query.arduino_id,
