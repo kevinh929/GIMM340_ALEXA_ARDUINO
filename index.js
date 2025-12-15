@@ -239,7 +239,6 @@ const StartBedtimeIntentHandler = {
             bedtime_end: endBedtime.endTime
         });
 
-
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
@@ -338,8 +337,7 @@ const skill = Alexa.SkillBuilders.custom()
         EndBedtimeIntentHandler,
         AddKidIntentHandler,
         RemoveKidIntentHandler,
-        ChangeKidNameIntentHandler,
-        GetBedtimeReportIntentHandler
+        ChangeKidNameIntentHandler
     )
     .withCustomUserAgent('reference-skills/intro-to-alexa-conversations/v7')
     .create(); 
