@@ -84,7 +84,7 @@ app.post('/arduino/', async (req, res) => {
             return;
         }
         // now we interpret data
-        if (parseInt(req.query.lidar) > 35) {
+        if (req.query.lidar > 35) {
             console.log("Something moved!");
             result = await event.create({
                 arduino_id: req.query.arduino_id,
@@ -93,7 +93,7 @@ app.post('/arduino/', async (req, res) => {
             });
         }
         
-        if (parseInt(req.query.light) == 1) {
+        if (req.query.light == "1") {
             console.log("Lights are on during bedtime!");
             result = await event.create({
                 arduino_id: req.query.arduino_id,
