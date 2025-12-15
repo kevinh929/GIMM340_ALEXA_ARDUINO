@@ -231,7 +231,7 @@ const StartBedtimeIntentHandler = {
         const speakOutput = `You activated the StartBedtimeIntent ${(child) ? " with name: " + child : ""}`;
 
         let kid_ids = await kids.getAll({ name: child });
-        let kid_id = kid_id[0].id;
+        let kid_id = kid_ids[0].id;
 
         isbedtimeActive = true;
         activeBedtime = { kid: child, startTime: new Date(Date.now()).toISOString() };
