@@ -311,9 +311,10 @@ const ChangeKidNameIntentHandler = {
     },
     async handle(handlerInput) {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
+        let newName = Alexa.getSlotValue(handlerInput.requestEnvelope, 'newname');
         const speakOutput = `You activated the ChangeKidNameIntent ${(child) ? " with name: " + child : ""}`;
-        await kids.update(child, {
-            name: child,
+        await kids.edit(child, {
+            name: newName,
             arduino_id: 0
         });
         return handlerInput.responseBuilder
