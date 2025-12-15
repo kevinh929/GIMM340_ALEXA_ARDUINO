@@ -96,7 +96,7 @@ app.post('/arduino/', async (req, res) => {
             console.log("Lights are on during bedtime!");
             result = await event.create({
                 arduino_id: req.query.arduino_id,
-                sensor_id: req.query.lidar_id,
+                sensor_id: req.query.light_id,
                 event_time: new Date().toISOString()
             });
         }
