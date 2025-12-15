@@ -230,8 +230,8 @@ const StartBedtimeIntentHandler = {
         let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
         const speakOutput = `You activated the StartBedtimeIntent ${(child) ? " with name: " + child : ""}`;
         isbedtimeActive = true;
-        activeBedtime = { kid: child, startTime: Date.now() };
-        endBedtime = { kid: child, endTime: Date.now() + 8*60*60*1000 };
+        activeBedtime = { kid: child, startTime: new Date(Date.now()).toISOString() };
+        endBedtime = { kid: child, endTime: new Date(Date.now() + 8*60*60*1000).toISOString() };
 
         await bedtimes.create({
             kid_id: child,
@@ -317,21 +317,6 @@ const ChangeKidNameIntentHandler = {
             name: newName,
             arduino_id: 0
         });
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt('anything else?')
-            .getResponse();
-    }
-};
-
-const GetBedtimeReportIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetBedtimeReportIntent';
-    },
-    handle(handlerInput) {
-        let child = Alexa.getSlotValue(handlerInput.requestEnvelope, 'kid');
-        const speakOutput = `You activated the GetBedtimeReportIntent ${(child) ? " with name: " + child : ""}`;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt('anything else?')
