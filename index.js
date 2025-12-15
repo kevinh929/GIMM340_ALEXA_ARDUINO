@@ -88,7 +88,7 @@ app.post('/arduino/', async (req, res) => {
             result = await event.create({
                 arduino_id: req.query.arduino_id,
                 sensor_id: req.query.lidar_id,
-                event_time: Date.now()
+                event_time: new Date().toISOString()
             });
         }
         else if (!req.query.light) {
@@ -96,7 +96,7 @@ app.post('/arduino/', async (req, res) => {
             result = await event.create({
                 arduino_id: req.query.arduino_id,
                 sensor_id: req.query.lidar_id,
-                event_time: Date.now()
+                event_time: new Date().toISOString()
             });
         }
     }
