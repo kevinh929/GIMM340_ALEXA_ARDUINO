@@ -24,6 +24,7 @@ class Bedtimes {
             throw error;
         }
     }
+    
     async innerJoinAll(parameters = {}) {
         try {
             let selectSql = `SELECT bedtime.id, bedtime.bedtime_start, bedtime.bedtime_end, kid_names.name, kid_names.arduino_id FROM bedtime INNER JOIN kid_names ON bedtime.kid_id = kid_names.id WHERE 1=1`,

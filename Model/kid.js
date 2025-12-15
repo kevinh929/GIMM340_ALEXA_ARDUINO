@@ -36,26 +36,27 @@ class Kid {
         }
     }
 
-    async edit(id, parameters) {
+    async edit(name, parameters) {
         try {
             const updateSql = `
                 UPDATE kid_names
                 SET name = ?, arduino_id = ?
-                WHERE id = ?
+                WHERE name = ?
             `;
             const updateParams = [
                 parameters.name,
                 parameters.arduino_id,
-                id
+                name
             ];
             await connection.query(updateSql, updateParams);
-            return { id, ...parameters };
+            return { name, ...parameters };
         }
         catch (error) {
             console.error("Error updating kid: ", error);
             throw error;
         }    
     }
+
     async remove(name) {
         try {
             const deleteSql = `DELETE FROM kid_names WHERE name = ?`;
